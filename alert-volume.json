@@ -1,0 +1,20 @@
+{
+  "title": "通知音(アラート音量)を fn+F11/F12 で増減",
+  "rules": [
+    {
+      "description": "fn+F11/F12 で alert volume(通知音)を増減。素の F11/F12 は通常のメイン音量のまま。",
+      "manipulators": [
+        {
+          "from": { "key_code": "f11", "modifiers": { "optional": ["any"] } },
+          "to": [{ "shell_command": "/usr/bin/osascript -e 'set v to (alert volume of (get volume settings)) - 10' -e 'if v < 0 then set v to 0' -e 'set volume alert volume v' -e 'beep'" }],
+          "type": "basic"
+        },
+        {
+          "from": { "key_code": "f12", "modifiers": { "optional": ["any"] } },
+          "to": [{ "shell_command": "/usr/bin/osascript -e 'set v to (alert volume of (get volume settings)) + 10' -e 'if v > 100 then set v to 100' -e 'set volume alert volume v' -e 'beep'" }],
+          "type": "basic"
+        }
+      ]
+    }
+  ]
+}
