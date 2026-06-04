@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1200, initial-scale=1">
+  <title>macOS notification volume thumbnail</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5f6f89;
+      --paper: #f6f9fc;
+      --panel: #ffffff;
+      --line: #d8e1ec;
+      --alert: #00a884;
+      --alert-dark: #05745f;
+      --sound: #ffb02e;
+      --sound-dark: #ad6410;
+      --blue: #3973e6;
+      --shadow: 0 24px 64px rgba(32, 45, 70, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 1200px;
+      height: 630px;
+      margin: 0;
+      overflow: hidden;
+      background: var(--paper);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+      color: var(--ink);
+    }
+
+    .canvas {
+      position: relative;
+      width: 1200px;
+      height: 630px;
+      padding: 52px 64px;
+      background:
+        radial-gradient(circle at 9% 8%, rgba(0, 168, 132, 0.16), transparent 26%),
+        radial-gradient(circle at 98% 6%, rgba(255, 176, 46, 0.18), transparent 23%),
+        linear-gradient(135deg, #fbfdff 0%, #edf6f9 46%, #fff8ea 100%);
+    }
+
+    .canvas::before {
+      position: absolute;
+      inset: 0;
+      content: "";
+      background-image:
+        linear-gradient(rgba(23, 32, 51, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23, 32, 51, 0.055) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.18));
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 512px 1fr;
+      gap: 44px;
+      height: 100%;
+      align-items: start;
+    }
+
+    .eyebrow {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      height: 36px;
+      padding: 0 15px;
+      border: 1px solid rgba(23, 32, 51, 0.12);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: #31405a;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0;
+      box-shadow: 0 10px 28px rgba(23, 32, 51, 0.08);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 76px;
+      line-height: 0.98;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin-top: 18px;
+      color: #41516d;
+      font-size: 30px;
+      line-height: 1.36;
+      font-weight: 750;
+      letter-spacing: 0;
+    }
+
+    .combo-callout {
+      display: inline-grid;
+      grid-auto-flow: column;
+      gap: 10px;
+      align-items: center;
+      margin-top: 28px;
+      padding: 14px 18px;
+      border: 1px solid rgba(0, 168, 132, 0.24);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: var(--shadow);
+    }
+
+    .plus {
+      color: #66758f;
+      font-size: 28px;
+      font-weight: 850;
+    }
+
+    .key {
+      min-width: 112px;
+      height: 58px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #cdd8e6;
+      border-bottom-width: 5px;
+      border-radius: 14px;
+      background: linear-gradient(#ffffff, #eef3f8);
+      color: #202b41;
+      font-size: 24px;
+      font-weight: 850;
+      letter-spacing: 0;
+      box-shadow: 0 12px 26px rgba(23, 32, 51, 0.13);
+    }
+
+    .key.control {
+      min-width: 158px;
+      border-color: rgba(0, 168, 132, 0.62);
+      background: linear-gradient(#eafff9, #bff4e6);
+      color: var(--alert-dark);
+    }
+
+    .note {
+      display: inline-flex;
+      margin-top: 22px;
+      padding: 12px 15px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.68);
+      color: #596982;
+      font-size: 20px;
+      font-weight: 720;
+      line-height: 1.35;
+      box-shadow: 0 10px 32px rgba(23, 32, 51, 0.08);
+    }
+
+    .routes {
+      display: grid;
+      gap: 20px;
+      padding-top: 2px;
+    }
+
+    .route {
+      position: relative;
+      min-height: 198px;
+      border: 1px solid rgba(23, 32, 51, 0.12);
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.84);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .route::after {
+      position: absolute;
+      inset: auto -44px -82px auto;
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      content: "";
+      opacity: 0.16;
+    }
+
+    .route.alert::after {
+      background: var(--alert);
+    }
+
+    .route.sound::after {
+      background: var(--sound);
+    }
+
+    .route-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 78px 1fr;
+      gap: 18px;
+      padding: 20px 30px;
+      align-items: center;
+    }
+
+    .icon-box {
+      width: 78px;
+      height: 78px;
+      display: grid;
+      place-items: center;
+      border-radius: 24px;
+      color: white;
+      box-shadow: 0 18px 34px rgba(23, 32, 51, 0.16);
+    }
+
+    .alert .icon-box {
+      background: linear-gradient(135deg, #00bf97, #05745f);
+    }
+
+    .sound .icon-box {
+      background: linear-gradient(135deg, #ffc25e, #f0871c);
+    }
+
+    .icon-box svg {
+      width: 50px;
+      height: 50px;
+      stroke-width: 2.5;
+    }
+
+    .route-label {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .route-label .tag {
+      display: inline-flex;
+      align-items: center;
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: #eef4fb;
+      color: #53647d;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .route-title {
+      margin: 0;
+      font-size: 36px;
+      line-height: 1.04;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .route.alert .route-title {
+      color: var(--alert-dark);
+    }
+
+    .route.sound .route-title {
+      color: var(--sound-dark);
+    }
+
+    .meter {
+      position: relative;
+      height: 18px;
+      margin-top: 18px;
+      border-radius: 999px;
+      background: #e8edf4;
+      overflow: hidden;
+    }
+
+    .meter span {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: inherit;
+    }
+
+    .alert .meter span {
+      width: 58%;
+      background: linear-gradient(90deg, #00a884, #37d6b2);
+    }
+
+    .sound .meter span {
+      width: 82%;
+      background: linear-gradient(90deg, #ff9d22, #ffd166);
+    }
+
+    .arrow {
+      position: absolute;
+      right: 50px;
+      top: 50%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transform: translateY(-50%);
+      color: white;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .route-chip {
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 14px;
+      border-radius: 14px;
+      background: rgba(23, 32, 51, 0.08);
+      color: #28364f;
+      font-size: 18px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .keyboard {
+      position: absolute;
+      left: 64px;
+      bottom: 44px;
+      width: 1072px;
+      height: 88px;
+      display: grid;
+      grid-template-columns: 178px 1fr 1fr 1fr 132px 132px;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid rgba(23, 32, 51, 0.14);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.74);
+      box-shadow: 0 24px 68px rgba(23, 32, 51, 0.16);
+      z-index: 2;
+    }
+
+    .kb-key {
+      display: grid;
+      place-items: center;
+      border: 1px solid #d4dfeb;
+      border-bottom-width: 4px;
+      border-radius: 16px;
+      background: linear-gradient(#ffffff, #eef3f8);
+      color: #56667e;
+      font-size: 21px;
+      font-weight: 850;
+      letter-spacing: 0;
+    }
+
+    .kb-key.ctrl {
+      border-color: rgba(0, 168, 132, 0.68);
+      background: linear-gradient(#eafff9, #c2f5e8);
+      color: var(--alert-dark);
+    }
+
+    .kb-key.fn {
+      color: #2f3e57;
+    }
+
+    .kb-key.vol {
+      border-color: rgba(255, 176, 46, 0.76);
+      background: linear-gradient(#fff9eb, #ffe1a0);
+      color: var(--sound-dark);
+    }
+  </style>
+</head>
+<body>
+  <main class="canvas" aria-label="macOSの通知音とメイン音量をF11/F12で分けるサムネイル">
+    <div class="content">
+      <section>
+        <div class="eyebrow">
+          <span class="pill">macOS</span>
+          <span class="pill">Karabiner-Elements</span>
+        </div>
+        <h1>通知音だけを<br>キーで調整</h1>
+        <div class="lead">左Controlを足すとアラート音量。<br>そのまま押すとサウンド音量。</div>
+        <div class="combo-callout" aria-label="左ControlとF11 F12のキーコンビネーション">
+          <span class="key control">左Control</span>
+          <span class="plus">+</span>
+          <span class="key">F11 / F12</span>
+        </div>
+        <div class="note">素の F11 / F12 は<br>いつものメイン音量のまま</div>
+      </section>
+
+      <section class="routes">
+        <article class="route alert">
+          <div class="route-inner">
+            <div class="icon-box" aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 50h18" />
+                <path d="M28 54c1.1 1.9 2.4 3 4 3s2.9-1.1 4-3" />
+                <path d="M49 44H15c4-4.6 5.6-9.8 5.6-18.2C20.6 17.8 25.5 12 32 12s11.4 5.8 11.4 13.8C43.4 34.2 45 39.4 49 44Z" />
+                <path d="M51 18l5-5" />
+                <path d="M8 13l5 5" />
+              </svg>
+            </div>
+            <div>
+              <div class="route-label">
+                <span class="route-chip">左Control + F11/F12</span>
+                <span class="tag">alert volume</span>
+              </div>
+              <h2 class="route-title">通知音だけ<br>上げ下げ</h2>
+              <div class="meter" aria-hidden="true"><span></span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="route sound">
+          <div class="route-inner">
+            <div class="icon-box" aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 26v12h11l14 11V15L21 26H10Z" />
+                <path d="M44 24c2.4 2.1 3.8 5 3.8 8s-1.4 5.9-3.8 8" />
+                <path d="M50 17c4.5 3.8 7 9.2 7 15s-2.5 11.2-7 15" />
+              </svg>
+            </div>
+            <div>
+              <div class="route-label">
+                <span class="route-chip">F11/F12</span>
+                <span class="tag">output volume</span>
+              </div>
+              <h2 class="route-title">サウンド音量を<br>いつも通り</h2>
+              <div class="meter" aria-hidden="true"><span></span></div>
+            </div>
+          </div>
+        </article>
+      </section>
+    </div>
+
+    <div class="keyboard" aria-hidden="true">
+      <div class="kb-key ctrl">left control</div>
+      <div class="kb-key">option</div>
+      <div class="kb-key">command</div>
+      <div class="kb-key">space</div>
+      <div class="kb-key vol">F11 −</div>
+      <div class="kb-key vol">F12 +</div>
+    </div>
+  </main>
+</body>
+</html>

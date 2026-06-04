@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1200, initial-scale=1">
+  <title>macOS volume thumbnail minimal</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 1200px;
+      height: 630px;
+      margin: 0;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+      color: #152033;
+      background: #f6f3ef;
+    }
+
+    .canvas {
+      position: relative;
+      width: 1200px;
+      height: 630px;
+      background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.02)),
+        url("./thumbnail-ai-base.png");
+      background-size: cover;
+      background-position: center center;
+    }
+
+    .title {
+      position: absolute;
+      left: 394px;
+      top: 52px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      padding: 12px 18px 15px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.64);
+      box-shadow: 0 18px 46px rgba(20, 31, 48, 0.14);
+      backdrop-filter: blur(16px);
+    }
+
+    .title-main {
+      color: #008b82;
+      font-size: 38px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .title-sub {
+      color: #b76a00;
+      font-size: 38px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .combo {
+      position: absolute;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 54px;
+      padding: 0 20px;
+      border-radius: 999px;
+      color: #10243f;
+      font-size: 25px;
+      font-weight: 900;
+      letter-spacing: 0;
+      box-shadow: 0 14px 34px rgba(20, 31, 48, 0.14);
+      backdrop-filter: blur(12px);
+      white-space: nowrap;
+    }
+
+    .combo.alert {
+      left: 78px;
+      bottom: 58px;
+      background: rgba(218, 255, 247, 0.82);
+      border: 2px solid rgba(0, 151, 139, 0.38);
+      color: #006f69;
+    }
+
+    .combo.sound {
+      right: 82px;
+      top: 258px;
+      background: rgba(255, 239, 204, 0.86);
+      border: 2px solid rgba(255, 165, 32, 0.5);
+      color: #a45c00;
+    }
+  </style>
+</head>
+<body>
+  <main class="canvas" aria-label="macOSで左ControlとF11/F12を使い分けるサムネイル">
+    <div class="title">
+      <span class="title-main">通知音</span>
+      <span class="title-sub">サウンド</span>
+    </div>
+
+    <div class="combo alert">左Control + F11/F12</div>
+    <div class="combo sound">F11/F12</div>
+  </main>
+</body>
+</html>

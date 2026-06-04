@@ -6,6 +6,16 @@ macOSで **通知音(アラート音量)だけ** を `⌃(Control)+F11` / `⌃+F
 - `⌃+F11` → 通知音 **下げ**(最後は無音=ミュート)
 - 素の `F11` / `F12` は今まで通り **メイン音量**
 
+## Karabiner-Elements とは
+
+[Karabiner-Elements](https://karabiner-elements.pqrs.org/) は macOS 用の**キーボードカスタマイズツール**(無料・OSS)。JSON で条件付きの高度なリマップ(Complex Modifications)を定義でき、キー入力をトリガに任意のシェルコマンドを実行する `shell_command` 機能もある。本リポジトリはこれを使って `⌃+F11/F12` に通知音量の操作を割り当てる。
+
+```bash
+brew install --cask karabiner-elements   # or https://karabiner-elements.pqrs.org/
+```
+
+初回起動時に **入力監視(Input Monitoring)権限** と **ドライバ(システム機能拡張)の許可** が必要。
+
 ## 仕組み
 
 通知音の正体は macOS の **Alert volume(警告音量)** で、出力音量とは独立(出力音量に対して相対)。AppleScript で操作できます。
